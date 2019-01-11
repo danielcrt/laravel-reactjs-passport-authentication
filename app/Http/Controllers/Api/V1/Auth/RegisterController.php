@@ -5,6 +5,8 @@ use App\Http\Transformers\UserTransformer;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use App\Notifications\RegisterNotification;
+
 class RegisterController extends DingoController
 {
     /*
@@ -56,6 +58,7 @@ class RegisterController extends DingoController
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => bcrypt($data['password']),
+            'activation_token' => str_random(60)
         ]);
     }
     /**
@@ -95,7 +98,23 @@ class RegisterController extends DingoController
         $user = $this->create($request->all());
         //event(new Registered($user = $this->create($request->all())));
         //$this->guard()->login($user);
+        $user->notify(new RegisterNotification($user));
+
         return $this->registered($request, $user)
             ?: redirect($this->redirectPath());
+    }
+
+    public function registerActivate($token)
+    {
+        $user = User::where('activation_token', $token)->first();
+        if (!$user) {
+            return response()->json([
+                'message' => 'This activation token is invalid.'
+            ], 404);
+        }
+        $user->email_verified_at = date("Y-m-d H:i:s");
+        $user->activation_token = '';
+        $user->save();
+        return $user;
     }
 }
