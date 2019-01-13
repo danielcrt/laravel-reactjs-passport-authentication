@@ -17,12 +17,14 @@ use Illuminate\Http\Request;
 $api = app('Dingo\Api\Routing\Router');
 // Create a Dingo Version Group
 $api->version('v1', function ($api) {
-    $api->post("register", 'App\Http\Controllers\Api\V1\Auth\RegisterController@register');
-    $api->get("register/{token}", 'App\Http\Controllers\Api\V1\Auth\RegisterController@registerActivate');
-    $api->post("login", 'App\Http\Controllers\Api\V1\Auth\LoginController@login');
-    $api->post("forgot", 'App\Http\Controllers\Api\V1\Auth\PasswordResetController@createToken');
-    $api->get("find/{token}", 'App\Http\Controllers\Api\V1\Auth\PasswordResetController@findToken');
-    $api->post("reset", 'App\Http\Controllers\Api\V1\Auth\PasswordResetController@reset');
+    $api->group(['middleware' => 'api'], function ($api) {
+        $api->post("register", 'App\Http\Controllers\Api\V1\Auth\RegisterController@register');
+        $api->get("register/{token}", 'App\Http\Controllers\Api\V1\Auth\RegisterController@registerActivate');
+        $api->post("login", 'App\Http\Controllers\Api\V1\Auth\LoginController@login');
+        $api->post("password/email", 'App\Http\Controllers\Api\V1\Auth\PasswordResetController@createToken');
+        $api->get("password/reset/{token}", 'App\Http\Controllers\Api\V1\Auth\PasswordResetController@findToken');
+        $api->post("password/reset", 'App\Http\Controllers\Api\V1\Auth\PasswordResetController@reset');
+    });
 
     // Protected routes
     $api->group(['middleware' => 'auth:api'], function ($api) {

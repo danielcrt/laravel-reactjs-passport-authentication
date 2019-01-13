@@ -4,12 +4,13 @@ namespace App\Http\Controllers\Api\V1\Auth;
 
 use App\Http\Controllers\Api\V1\DingoController;
 use App\Http\Transformers\NullObjectTransformer;
-use App\Http\Transformers\PersonalAccessTokenResultTransformer;
+use App\Http\Transformers\UserTransformer;
 use App\Models\NullObject;
 use App\Models\User;
 use Dingo\Api\Http\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+
 class LoginController extends DingoController
 {
     /**
@@ -72,17 +73,15 @@ class LoginController extends DingoController
     {
         $inputs = $request->all();
         $user = User::where($this->username(), $inputs[$this->username()])->firstOrFail();
-        $token = $user->createToken('Personal Access Token');
         $meta = array(
             'status_code' => 200,
             'status_text' => "OK",
             'message' => trans("auth.login.success"),
         );
-        $response = $this->response->item($token, new PersonalAccessTokenResultTransformer())
+        $response = $this->response->item($user, new UserTransformer())
             ->setStatusCode(200)
             ->setMeta($meta);
-        // Use this method instead of send(). It also saves you from weird
-        // assertJsonStructure errors
+        
         $response->throwResponse();
     }
     /**
@@ -94,7 +93,7 @@ class LoginController extends DingoController
      */
     protected function authenticated(Request $request, $user)
     {
-        //
+       
     }
     /**
      * Get the failed login response instance.
@@ -141,4 +140,5 @@ class LoginController extends DingoController
         // assertJsonStructure errors
         $response->throwResponse();
     }
+
 }

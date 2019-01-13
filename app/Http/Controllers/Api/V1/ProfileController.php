@@ -1,6 +1,8 @@
 <?php
 namespace App\Http\Controllers\Api\V1;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 class ProfileController extends DingoController
 {
     /**
@@ -20,7 +22,9 @@ class ProfileController extends DingoController
     public function show(Request $request)
     {
         $user = $request->user();
-        return $user;
+        return response()->json([
+            'user' => $user
+        ]);
     }
     /**
      * Update the specified resource in storage.

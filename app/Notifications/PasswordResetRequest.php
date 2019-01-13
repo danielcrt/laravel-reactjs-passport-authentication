@@ -10,7 +10,6 @@ use Illuminate\Notifications\Messages\MailMessage;
 class PasswordResetRequest extends Notification
 {
     use Queueable;
-
     
     protected $token;
 
@@ -43,7 +42,7 @@ class PasswordResetRequest extends Notification
      */
     public function toMail($notifiable)
     {
-        $url = url('/api/find/'.$this->token);
+        $url = url('/api/password/reset/'.$this->token);
         return (new MailMessage)
             ->line('You are receiving this email because we received a password reset request for your account.')
             ->action('Reset Password', url($url))

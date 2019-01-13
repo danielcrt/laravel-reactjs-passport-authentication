@@ -5,6 +5,7 @@ namespace App\Providers;
 use Dingo\Api\Auth\Provider\Authorization;
 use Dingo\Api\Routing\Route;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class DingoPassportServiceProvider extends Authorization
 {
@@ -29,7 +30,9 @@ class DingoPassportServiceProvider extends Authorization
      */
     public function authenticate(Request $request, Route $route)
     {
-        $this->validateAuthorizationHeader($request);
+        if ($request->bearerToken()) {
+            $this->validateAuthorizationHeader($request);
+        } 
 
         return $request->user();
     }

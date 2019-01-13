@@ -1,0 +1,30 @@
+#loginPage {
+    height: 100%;
+    display: 'flex';
+    align-items: 'center';
+    justify-content: 'center';
+
+    form {
+        background: #fff;
+        border-radius: 5px;
+        box-shadow: 0 0 30px #333;
+        margin: 0 auto;
+        max-width: 500px;
+        width: 90%;
+        .form-header {
+            width: 100%;
+            background: #febf70; /* Old browsers */
+            background: -moz-linear-gradient(45deg, #febf70 0%, #ff626d 100%); /* FF3.6-15 */
+            background: -webkit-linear-gradient(45deg, #febf70 0%,#ff626d 100%); /* Chrome10-25,Safari5.1-6 */
+            background: linear-gradient(45deg, #febf70 0%,#ff626d 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+            filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#febf70', endColorstr='#ff626d',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+            h1 {
+                text-align: center;
+                padding: 40px;
+                font-size: 30px;
+                color: #fff;
+            }
+        }
+        
+    }
+}
