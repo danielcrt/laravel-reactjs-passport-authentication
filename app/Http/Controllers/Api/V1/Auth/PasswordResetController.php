@@ -13,6 +13,7 @@ use App\Models\Error;
 use App\Http\Transformers\ErrorTransformer;
 use App\Http\Transformers\UserTransformer;
 use App\Http\Transformers\PasswordResetTransformer;
+use Illuminate\Support\Facades\Validator;
 
 class PasswordResetController extends DingoController
 {
@@ -24,13 +25,25 @@ class PasswordResetController extends DingoController
      */
     public function createToken(Request $request)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'email' => 'required|string|email',
         ]);
+        
+        if($validator->fails())
+        {
+            $error = new Error([
+                'response_message' => validationErrorsToString($validator->errors()),
+                'code' => 404,
+                ]);
+            $response = $this->response->item($error, new ErrorTransformer())
+                ->setStatusCode(404);
+            return $response->throwResponse();
+        }
+
         $user = User::where('email', $request->email)->first();
         if (!$user) {
             $error = new Error([
-                'message' => "We can't find a user with that e-mail address.",
+                'response_message' => "We can't find a user with that e-mail address.",
                 'code' => 404,
                 ]);
             $response = $this->response->item($error, new ErrorTransformer())
@@ -50,7 +63,7 @@ class PasswordResetController extends DingoController
             );
         return response()->json([
             'data' => [
-                'message' => 'We have e-mailed your password reset link!'
+                'response_message' => 'We have e-mailed your password reset link!'
             ]
         ]);
     }
@@ -67,7 +80,7 @@ class PasswordResetController extends DingoController
             ->first();
         if (!$passwordReset) {
             $error = new Error([
-                'message' => 'This password reset token is invalid.',
+                'response_message' => 'This password reset token is invalid.',
                 'code' => 404,
                 ]);
             $response = $this->response->item($error, new ErrorTransformer())
@@ -77,7 +90,7 @@ class PasswordResetController extends DingoController
         if (Carbon::parse($passwordReset->updated_at)->addMinutes(720)->isPast()) {
             $passwordReset->delete();
             $error = new Error([
-                'message' => 'This password reset token is invalid.',
+                'response_message' => 'This password reset token is invalid.',
                 'code' => 404,
                 ]);
             $response = $this->response->item($error, new ErrorTransformer())
@@ -100,18 +113,30 @@ class PasswordResetController extends DingoController
      */
     public function reset(Request $request)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'email' => 'required|string|email',
             'password' => 'required|string|confirmed',
             'token' => 'required|string'
         ]);
+         
+        if($validator->fails())
+        {
+            $error = new Error([
+                'response_message' => validationErrorsToString($validator->errors()),
+                'code' => 404,
+                ]);
+            $response = $this->response->item($error, new ErrorTransformer())
+                ->setStatusCode(404);
+            return $response->throwResponse();
+        }
+
         $passwordReset = PasswordReset::where([
             ['token', $request->token],
             ['email', $request->email]
         ])->first();
         if (!$passwordReset) {
             $error = new Error([
-                'message' => 'This password reset token is invalid.',
+                'response_message' => 'This password reset token is invalid.',
                 'code' => 404,
                 ]);
             $response = $this->response->item($error, new ErrorTransformer())
@@ -121,7 +146,7 @@ class PasswordResetController extends DingoController
         $user = User::where('email', $passwordReset->email)->first();
         if (!$user) {
             $error = new Error([
-                'message' => "We can't find a user with that e-mail address.",
+                'response_message' => "We can't find a user with that e-mail address.",
                 'code' => 404,
                 ]);
             $response = $this->response->item($error, new ErrorTransformer())

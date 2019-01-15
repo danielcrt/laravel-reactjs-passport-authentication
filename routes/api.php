@@ -29,6 +29,6 @@ $api->version('v1', function ($api) {
     // Protected routes
     $api->group(['middleware' => 'auth:api'], function ($api) {
         $api->get('profile', 'App\Http\Controllers\Api\V1\ProfileController@show');
-        $api->get('logout', 'App\Http\Controllers\Api\V1\Auth\LoginController@logout');
+        $api->post('logout', 'App\Http\Controllers\Api\V1\Auth\LoginController@logout');
     });
 });

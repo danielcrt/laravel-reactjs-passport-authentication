@@ -1,9 +1,10 @@
 import React  from 'react';
 import { NavLink } from 'react-router-dom';
 import { connect } from 'react-redux'
-import { userActions } from '../../../actions';
-import { history } from '../../../helpers';
-import Header from '../../../components/Header/Header';
+import { userActions, alertActions } from '../../../actions';
+import MaterialInput from '../../../components/MaterialInput'
+import MaterialButton from '../../../components/MaterialButton'
+
 import './LoginPage.scss'
 
 class LoginPage extends React.Component {
@@ -13,7 +14,8 @@ class LoginPage extends React.Component {
         this.state = {
             email: '',
             password: '',
-            submitted: false
+            submitted: false,
+            loading: false
         };
 
         this.handleChange = this.handleChange.bind(this);
@@ -31,62 +33,67 @@ class LoginPage extends React.Component {
         this.setState({ submitted: true });
         const { email, password } = this.state;
         const { dispatch } = this.props;
-        if (email && password) {
-            dispatch(userActions.loginRedirect(email, password));
-        }
+        dispatch(alertActions.clear());
+        dispatch(userActions.loginRedirect(email, password));
     }
 
     render() {
+        const { alert } = this.props;
         const { email, password, submitted } = this.state;
         return (
-            <>
-                <Header location={history.location}/>
-                <div id="loginPage">
-                    <form name="form" onSubmit={this.handleSubmit} autoComplete="off">
-                        <div className="form-header">
-                            <h1>YOUR APP NAME</h1>
+            <div id="loginPage">
+                <form name="form" onSubmit={this.handleSubmit} autoComplete="off">
+                    <div className="form-header">
+                        <h1>LOGIN</h1>
+                    </div>
+                    <div className="form-body">
+                        <MaterialInput
+                            submitted={submitted}
+                            hasError={!email}
+                            error="Email is required"
+                            label="Email"
+                            inputProps={{
+                                type: "text",
+                                name: "email",
+                                value: email,
+                                onChange: this.handleChange,
+                                autoComplete: "off",
+                                required: "required"
+                            }}/>
+                        <MaterialInput
+                            submitted={submitted}
+                            hasError={!password}
+                            error="Password is required"
+                            label="Password"
+                            inputProps={{
+                                type: "password",
+                                name: "password",
+                                value: password,
+                                onChange: this.handleChange,
+                                autoComplete: "off",
+                                required: "required"
+                            }}/>
+                        <div className='text-right'>
+                            <NavLink to="/password/email">
+                                Forgot password?
+                            </NavLink>
                         </div>
-                        <div className="form-body">
-                            <div className={'mdl-group' + (submitted && !email ? ' has-error' : '')}>
-                                <input type="text" name="email" value={email} 
-                                    onChange={this.handleChange}
-                                    autoComplete="off" />
-                                <span className="highlight"></span>
-                                <span className="bar"></span>
-                                <label htmlFor="email">Email</label>
-                                {submitted && !email &&
-                                    <div className="help-block">Email is required</div>
-                                }
-                            </div>
-                            
-                            <br/>
-                            <div className={'mdl-group' + (submitted && !password ? ' has-error' : '')}>
-                                <input type="password" 
-                                    name="password" 
-                                    value={password} 
-                                    onChange={this.handleChange} 
-                                    autoComplete="off"/>
-                                <span className="highlight"></span>
-                                <span className="bar"></span>
-                                <label htmlFor="password">Password</label>
-                                {submitted && !password &&
-                                    <div className="help-block">Password is required</div>
-                                }
-                            </div>
-                        </div>
-                        <div className="form-footer">
-                            <div className='form-group text-center'>
-                                <NavLink to="/password/email">
-                                    Forgot password?
-                                </NavLink>
-                            </div>
-                            <div className="form-group">
-                                <button className="button">Login</button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </>
+                    </div>
+                    <div className="form-footer">
+                        {alert.message &&
+                            <div className={`alert ${alert.type}`}>{alert.message}</div>
+                        }
+                        {(alert.message || !submitted) &&
+                            <MaterialButton
+                                name="Login" />
+                        }
+                        <hr/>
+                        <NavLink to="/register">
+                            Don't have an account? Register here.
+                        </NavLink>
+                    </div>
+                </form>
+            </div>
         );
     }
 }

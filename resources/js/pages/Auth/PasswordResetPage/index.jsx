@@ -1,23 +1,23 @@
 import React from 'react';
-import { connect } from 'react-redux';
+import { connect } from 'react-redux'
+import { NavLink } from 'react-router-dom';
 import { userService } from '../../../services';
 import { userActions } from '../../../actions';
-//import qs from 'query-string';
-import { history } from '../../../helpers';
-import Header from '../../../components/Header/Header';
-
+import './PasswordResetPage.scss'
+import MaterialInput from '../../../components/MaterialInput'
+import MaterialButton from '../../../components/MaterialButton'
+import qs from 'qs'
 
 class PasswordResetPage extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             token: this.props.match.params.token,
-            email: qs.parse(this.props.location.search).email,
+            email: qs.parse(this.props.location.search, { ignoreQueryPrefix: true }).email,
             password: '',
             password_confirmation: '',
             submitted: false
         };
-
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
     }
@@ -33,83 +33,81 @@ class PasswordResetPage extends React.Component {
         this.setState({ submitted: true });
         const { email, password, password_confirmation, token } = this.state;
         const { dispatch } = this.props;
-        if (email && password && password_confirmation && password == password_confirmation) {
-            userService.passwordReset(email, password, password_confirmation, token, (response)=> {
-                if(response.error)
-                {
-                    this.setState({
-                        error: response.error_message
-                    }); 
-                } else {
-                    dispatch(userActions.loginRedirect(email, password));
-                }
-            }, (err) => {
+        userService.passwordReset(email, password, password_confirmation, token, (response)=> {
+            if(response.error)
+            {
                 this.setState({
-                    success: '',
-                    error: err.message
-                });
+                    submitted: false,
+                    error: response.error_message
+                }); 
+            } else {
+                dispatch(userActions.loginRedirect(email, password));
+            }
+        }, (err) => {
+            this.setState({
+                submitted: false,
+                success: '',
+                error: err.data.response_message
             });
-        }
+        });
     }
 
     render() {
-        const { alert } = this.props;
-        const { password_confirmation, password, submitted,error  } = this.state;
+        const { password_confirmation, password, submitted, error  } = this.state;
         return (
-            <div>
-                <Header location={history.location}/>
-
-                <div id="authPage" className="d-flex justify-content-center align-items-start">
-                    <form name="form" className="auth-form" onSubmit={this.handleSubmit}>
-                        <h2>reset password</h2>
-                        <br/>
-                        {alert.message &&
-                            <div className={`alert ${alert.type}`}>{alert.message}</div>
-                        }
+            <div id="resetPage2">
+                <form name="form" onSubmit={this.handleSubmit}>
+                <div className="form-header">
+                        <h1>RESET PASSWORD</h1>
+                    </div>
+                    <div className="form-body">
+                        <MaterialInput
+                            submitted={submitted}
+                            hasError={!password}
+                            error="Password is required"
+                            label="Password"
+                            inputProps={{
+                                type: "password",
+                                name: "password",
+                                value: password,
+                                onChange: this.handleChange,
+                                autoComplete: "off",
+                                required: "required"
+                            }}/>
+                        <MaterialInput
+                            submitted={submitted}
+                            hasError={password != password_confirmation}
+                            error="Passwords should match"
+                            label="Password confirmation"
+                            inputProps={{
+                                type: "password",
+                                name: "password_confirmation",
+                                value: password_confirmation,
+                                onChange: this.handleChange,
+                                autoComplete: "off",
+                                required: "required"
+                            }}/>
+                    </div>
+                    <div className="form-footer">
                         {error &&
                             <div className="alert alert-danger" role="alert">
-                              {error}
+                                {error}
                             </div>
                         }
-                        <div className={'mdl-group' + (submitted && !password ? ' has-error' : '')}>
-                            <input type="password" className="form-control" name="password" value={password} onChange={this.handleChange} placeholder="password"
-                            autoComplete="off"/>
-                            <span className="highlight"></span>
-                            <span className="bar"></span>
-                            <label htmlFor="password">Password</label>
-                            {submitted && !password &&
-                                <div className="help-block">Password is required</div>
-                            }
-                        </div>
-                        <br/>
-                        <div className={'mdl-group' + (submitted && !password_confirmation && (password != password_confirmation) ? ' has-error' : '')}>
-                            <input type="password" name="password_confirmation" value={password_confirmation} onChange={this.handleChange} placeholder="confirm password"
-                            autoComplete="off"/>
-                            <span className="highlight"></span>
-                            <span className="bar"></span>
-                            <label htmlFor="password_confirmation">Password</label>
-                            {submitted && !password_confirmation &&
-                                <div className="help-block">Password is required</div>
-                            }
-                            {submitted && (password != password_confirmation) &&
-                                <div className="help-block">Passwords must match</div>
-                            }
-                        </div>
-                        <div className="form-group">
-                            <button className="button">Reset password</button>
-                        </div>
-                    </form>
-                </div>
+                        {!submitted &&
+                            <MaterialButton
+                            name="Reset password" />
+                        }
+                        
+                        <hr/>
+                        <NavLink to="/login">
+                            Oh! I've remembered it.
+                        </NavLink>
+                    </div>
+                </form>
             </div>
         );
     }
 }
 
-function mapStateToProps(state) {
-    const { alert, authentication } = state;
-    return {
-        alert
-    };
-}
-
-export default connect(mapStateToProps)(PasswordResetPage)
+export default connect()(PasswordResetPage)

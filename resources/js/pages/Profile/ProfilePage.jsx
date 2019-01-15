@@ -1,27 +1,52 @@
-import React, { Component } from 'react'
+import React from 'react'
 import Http from '../../helpers/Http'
-import { GlobalConstants } from '../../constants';
+import { connect } from 'react-redux';
+import { userActions } from '../../actions';
+import MaterialButton from '../../components/MaterialButton'
+class ProfilePage extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      user: {}
+    };
+    
+    this.logout = this.logout.bind(this);
 
-export default class ProfilePage extends Component {
+  }
   componentDidMount() {
+    var that = this;
     Http.get('profile')
       .then(function(response) {
-        console.log(response);
+        that.setState({
+          user: response.data.user
+        })
       }).catch(function(err) {
         console.log(err);
       })
 
   }
   logout() {
-    localStorage.removeItem(GlobalConstants.USER_KEY);
+    const { dispatch } = this.props;
+    dispatch(userActions.logout());
   }
   
   render() {
+    const { user } = this.state;
     return (
-      <>
-          PROFILE
-          <button type="button" onClick={this.logout}>LOGOUT</button>
-      </>
+      <div className="h-100 d-flex align-items-center justify-content-center flex-column">
+          <h1>PROFILE</h1>
+          {user.name &&
+            <p>Hello {user.name},</p>
+          }
+          {user.email &&
+            <p>Email: {user.email}</p>
+          }
+          <MaterialButton name="LOGOUT" onClick={this.logout}/>
+      </div>
     )
   }
 }
+function mapStateToProps() {
+  return {};
+}
+export default connect(mapStateToProps)(ProfilePage)

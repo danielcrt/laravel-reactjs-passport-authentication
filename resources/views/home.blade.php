@@ -9,7 +9,7 @@
         <meta property="og:image:secure_url" content='{{ asset("images/logo.png") }}'>
         <meta name="mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-capable" content="yes">
-        <link rel="manifest" href="./manifest.json"/>
+        <!--<link rel="manifest" href="./manifest.json"/>
         <link rel="apple-touch-icon" sizes="57x57" href="/favicon/apple-icon-57x57.png">
         <link rel="apple-touch-icon" sizes="60x60" href="/favicon/apple-icon-60x60.png">
         <link rel="apple-touch-icon" sizes="72x72" href="/favicon/apple-icon-72x72.png">
@@ -22,13 +22,15 @@
         <link rel="icon" type="image/png" sizes="192x192"  href="/favicon/android-icon-192x192.png">
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
         <link rel="icon" type="image/png" sizes="96x96" href="/favicon/favicon-96x96.png">
-        <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">-->
         <meta name="msapplication-TileColor" content="#ffffff">
         <meta name="msapplication-TileImage" content="/favicon/ms-icon-144x144.png">
         <meta name="theme-color" content="#ffffff">
-        <title>Decide</title>
+        <title>{{ env('APP_NAME','') }}</title>
+        <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
-    </head>
+        <link rel="stylesheet" href="{{ asset("css/app.css") }}" type="text/css">
+   </head>
     <body>
         <noscript>JavaScript is not available</noscript>
         <div id='app'></div>

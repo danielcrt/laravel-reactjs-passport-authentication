@@ -10,6 +10,9 @@ use App\Models\User;
 use Dingo\Api\Http\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cookie;
+use Laravel\Passport\Passport;
 
 class LoginController extends DingoController
 {
@@ -103,7 +106,7 @@ class LoginController extends DingoController
      */
     protected function sendFailedLoginResponse(Request $request)
     {
-        $this->response()->errorUnauthorized(trans('auth.login.failed'));
+        $this->response()->error(trans('auth.login_failed'), 403);
     }
     /**
      * Get the login username to be used by the controller.
@@ -126,8 +129,9 @@ class LoginController extends DingoController
      */
     public function logout(Request $request)
     {
-        $request->user()->token()->revoke();
-        $request->user()->token()->delete();
+        //Methods for Authorization header access
+        //$request->user()->token()->revoke();
+        //$request->user()->token()->delete();
         $meta = array(
             'status_code' => 200,
             'status_text' => "OK",
@@ -136,9 +140,8 @@ class LoginController extends DingoController
         $response = $this->response->item(new NullObject(), new NullObjectTransformer())
             ->setStatusCode(200)
             ->setMeta($meta);
-        // Use this method instead of send(). It also saves you from weird
-        // assertJsonStructure errors
-        $response->throwResponse();
+
+        $response->withCookie(Cookie::forget(Passport::cookie()))->throwResponse();
     }
 
 }

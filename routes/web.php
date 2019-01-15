@@ -11,4 +11,6 @@
 |
 */
 
-Route::view('/{path?}', 'home');
+Route::view('/{path?}', 'home')
+     ->where('path', '.*')
+     ->name('react');

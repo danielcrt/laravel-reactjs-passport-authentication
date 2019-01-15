@@ -13,7 +13,7 @@ class ErrorTransformer extends TransformerAbstract
     {
         return [
             'code'            => (int) $error->code,
-            'message'          => $error->message,
+            'response_message'          => $error->response_message,
         ];
     }
 }

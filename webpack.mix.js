@@ -11,5 +11,21 @@ const mix = require('laravel-mix');
  |
  */
 
+var webpack = require('webpack');
+
+mix.webpackConfig({
+    resolve: {
+        extensions: ['.js', '.jsx']
+    },
+    plugins: [
+        new webpack.DefinePlugin({ // <-- key to reducing React's size
+            'process.env': {
+                'NODE_ENV': JSON.stringify('production')
+            }
+        }),
+        new webpack.optimize.AggressiveMergingPlugin(),//Merge chunks
+    ]
+});
+
 mix.react('resources/js/app.js', 'public/js')
    .sass('resources/sass/app.scss', 'public/css');

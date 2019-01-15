@@ -1,4 +1,3 @@
-import { authHeader } from '../helpers';
 import { GlobalConstants } from '../constants';
 import Http from '../helpers/Http';
 
@@ -7,40 +6,8 @@ export const userService = {
     register,
     passwordEmail,
     passwordReset,
-    getCurrentUser,
     logout
 };
-
-function formatDate(date) {
-    var d = new Date(date),
-        month = '' + d.getMonth(),
-        day = '' + d.getDate(),
-        year = d.getFullYear();
-
-    if (month.length < 2) month = '0' + month;
-    if (day.length < 2) day = '0' + day;
-
-    return [year, month, day].join('-');
-}
-function getCurrentUser(token, successCallback,errCallback) {
-    const config = {     
-        headers: { 'Authorization': 'Bearer '+token }
-    };
-
-    Http('token',config)
-      .then(function (response) {
-        if(response.error)
-        {
-            errCallback(response.data);
-        } else {
-            successCallback(response.data);
-        }
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
-
-}
 
 function login(email,password) {
 
@@ -48,13 +15,9 @@ function login(email,password) {
     formData.append('email',email);
     formData.append('password',password);
 
-    const config = {     
-        headers: { 'Content-Type': 'application/json' }
-    };
-
-    return Http.post('login', formData,config)
+    return Http.post('login', formData)
       .then(function (response) {
-        let user = response.data;
+        let user = response.data.data;
         if (user) {
             // store user details and jwt token in local storage to keep user logged in between page refreshes
             localStorage.setItem(GlobalConstants.USER_KEY, JSON.stringify(user));
@@ -65,7 +28,9 @@ function login(email,password) {
         return user;
       })
       .catch(function (error) {
-        console.log(error);
+        if(error.response.data.status_code === 403) {
+          return error.response.data;
+        }
       });
 }
 
@@ -74,16 +39,16 @@ function passwordEmail(email, successCallback, errCallback) {
     const formData = new FormData();
     formData.append('email',email);
 
-    const config = {     
-        headers: { 'Content-Type': 'application/json' }
-    };
-
-    Http.post(GlobalConstants.API_URL+'/auth/password/email', formData,config)
+    Http.post('password/email', formData)
       .then(function (response) {
-        successCallback(response);
+        if(response.data.error) {
+          errCallback(response.data);
+        } else {
+          successCallback(response);
+        }
       })
       .catch(function (error) {
-        errCallback(error);
+        errCallback(error.response.data);
       });
 }
 
@@ -95,51 +60,53 @@ function passwordReset(email,password, password_confirmation, token, successCall
     formData.append('password_confirmation',password_confirmation);
     formData.append('token',token);
 
-    const config = {     
-        headers: { 'Content-Type': 'application/json' }
-    };
-
-    Http.post(GlobalConstants.API_URL+'/auth/password/reset', formData,config)
+    Http.post('password/reset', formData)
       .then(function (response) {
-        successCallback(response.data);
+        console.log(response);
+        if(response.data.data && response.data.data.error) {
+          errCallback(response.data.data);
+        } else {
+          successCallback(response.data);
+        }
       })
       .catch(function (error) {
-        errCallback(error);
+        if(error && error.response) {
+          errCallback(error.response.data);
+        }
       });
 }
 
-function register(name, email, password) {
+function register(name, email, password, password_confirmation, validationCallback) {
 
     const formData = new FormData();
     formData.append('name',name);
     formData.append('email',email);
     formData.append('password',password);
+    formData.append('password_confirmation',password_confirmation);
 
-    const config = {     
-        headers: { 'Content-Type': 'application/json' }
-    };
-
-    return Http.post(GlobalConstants.API_URL+'/auth/register', formData,config)
+    return Http.post('register', formData)
       .then(function (response) {
-        let user = response.data;
-        if (user.token) {
+        if(response.data.error) {
+            return response.data;
+        }
+        let user = response.data.data;
+        if (user) {
             // store user details and jwt token in local storage to keep user logged in between page refreshes
             localStorage.setItem(GlobalConstants.USER_KEY, JSON.stringify(user));
         } else {
             window.scrollTo(0, 0);
         }
-
         return user;
       })
       .catch(function (error) {
         console.log(error);
+        
       });
 }
 function logout() {
     return Http.post('logout')
       .then(function (response) {
-        // remove user from local storage to log user out
-        localStorage.removeItem(GlobalConstants.USER_KEY);
+          return response;
       })
       .catch(function (error) {
         console.log(error);

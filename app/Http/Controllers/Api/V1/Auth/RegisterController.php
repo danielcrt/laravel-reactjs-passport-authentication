@@ -9,6 +9,7 @@ use App\Notifications\RegisterNotification;
 
 class RegisterController extends DingoController
 {
+    
     /*
     |--------------------------------------------------------------------------
     | Register Controller
@@ -94,11 +95,23 @@ class RegisterController extends DingoController
          * error bag in a nice way and sends it back in the response
          */
         $validator = $this->validator($request->all());
-        $this->validateByValidator($request, $validator);
+        //$this->validateByValidator($request, $validator);
+        if($validator->fails())
+        {
+            return response()->json([
+                "error" => true,
+                "response_message" => validationErrorsToString($validator->errors())
+            ]);
+        }
         $user = $this->create($request->all());
-        //event(new Registered($user = $this->create($request->all())));
-        //$this->guard()->login($user);
+        $user->email_verified_at = NULL;
         $user->notify(new RegisterNotification($user));
+        /*
+        if (Auth::guard("web")->once($this->credentials($request)) ){
+            $this->sendLoginResponse($request);
+        } else {
+            $this->sendFailedLoginResponse($request);
+        }*/
 
         return $this->registered($request, $user)
             ?: redirect($this->redirectPath());
@@ -115,6 +128,6 @@ class RegisterController extends DingoController
         $user->email_verified_at = date("Y-m-d H:i:s");
         $user->activation_token = '';
         $user->save();
-        return $user;
+        return redirect($this->redirectPath());
     }
 }

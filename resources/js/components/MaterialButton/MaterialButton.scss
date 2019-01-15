@@ -1,0 +1,26 @@
+@import '../../../../resources/sass/variables';
+
+.button {
+    background-color: $color-primary;
+    color: #fff;
+    background-image: linear-gradient(-45deg, $color-primary, $color-secondary);
+    border: none;
+    margin-top:25px;
+    padding: 15px 32px;
+    text-align: center;
+    margin:0 auto;
+    text-decoration: none;
+    text-transform: uppercase;
+    font-size: 16px;
+    border-radius: 50px;
+    min-width: 200px;
+    &:hover {
+        cursor: pointer;
+    }
+    &:focus {
+        outline: 0;
+        -webkit-box-shadow: none;
+        -moz-box-shadow: none;
+        box-shadow: none;
+      }
+}

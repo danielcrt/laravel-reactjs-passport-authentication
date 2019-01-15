@@ -1,10 +1,10 @@
-import { userConstants } from '../constants';
+import { userConstants, GlobalConstants } from '../constants';
 import { userService } from '../services';
 import { history } from '../helpers';
+import { alertActions } from './alert.actions'
 
 export const userActions = {
     update,
-    login,
     loginRedirect,
     register,
     logout
@@ -35,31 +35,6 @@ function update(user) {
     function failure(error) { return { type: userConstants.UPDATE_FAILURE, error } }
 }
 
-function login(email, password) {
-    return dispatch => {
-        dispatch(request({ email }));
-
-        userService.login(email, password)
-            .then(
-                user => { 
-                    if(user.error)
-                    {
-                        dispatch(failure(user.message));
-                    } else {
-                        dispatch(success(user));
-                    }
-                },
-                error => {
-                    dispatch(failure(error));
-                }
-            );
-    };
-
-    function request(user) { return { type: userConstants.LOGIN_REQUEST, user } }
-    function success(user) { return { type: userConstants.LOGIN_SUCCESS, user } }
-    function failure(error) { return { type: userConstants.LOGIN_FAILURE, error } }
-}
-
 function loginRedirect(email, password) {
     return dispatch => {
         dispatch(request({ email }));
@@ -67,9 +42,10 @@ function loginRedirect(email, password) {
         userService.login(email, password)
             .then(
                 user => { 
-                    if(user.error)
+                    if(user.status_code == 403)
                     {
                         dispatch(failure(user.message));
+                        dispatch(alertActions.error(user.message))
                     } else {
                         dispatch(success(user));
                         history.push('/');
@@ -86,16 +62,15 @@ function loginRedirect(email, password) {
     function failure(error) { return { type: userConstants.LOGIN_FAILURE, error } }
 }
 
-function register(firstName, lastName, phone, email, dob, gender, password) {
+function register(name, email, password, password_confirmation) {
     return dispatch => {
         dispatch(request({ email }));
 
-        userService.register(firstName, lastName, phone, email, dob, gender, password)
-            .then(
-                user => { 
+        userService.register(name, email, password, password_confirmation)
+            .then(user => { 
                     if(user.error)
                     {
-                        dispatch(failure(user.message));
+                        dispatch(alertActions.error(user.response_message));
                     } else {
                         dispatch(success(user));
                         history.push('/');
@@ -103,7 +78,6 @@ function register(firstName, lastName, phone, email, dob, gender, password) {
                 },
                 error => {
                     dispatch(failure(error));
-                    dispatch(alertActions.error(error));
                 }
             );
     };
@@ -114,6 +88,23 @@ function register(firstName, lastName, phone, email, dob, gender, password) {
 }
 
 function logout() {
-    userService.logout();
-    return { type: userConstants.LOGOUT };
+    return dispatch => {
+        dispatch(request({ }));
+
+        userService.logout()
+            .then(_response => { 
+                    // remove user from local storage to log user out
+                    localStorage.removeItem(GlobalConstants.USER_KEY);
+                    history.push('/');
+                    dispatch(success());
+                },
+                error => {
+                    dispatch(failure(error));
+                }
+            );
+    };
+
+    function request(user) { return { type: userConstants.LOGOUT_REQUEST, user } }
+    function success() { return { type: userConstants.LOGOUT_SUCCESS } }
+    function failure(error) { return { type: userConstants.LOGIN_FAILURE, error } }
 }
