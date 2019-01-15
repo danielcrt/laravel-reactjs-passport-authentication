@@ -34,12 +34,12 @@
     <body>
         <noscript>JavaScript is not available</noscript>
         <div id='app'></div>
-        <!-- Scripts -->
+        <!-- Scripts 
         <script>
             window.Laravel = {!! json_encode([
                 'csrfToken' => csrf_token(),
             ]) !!};
-        </script>
+        </script>-->
         <script type="text/javascript" src="{{ asset("js/app.js") }}"></script>
     </body>
 </html>
